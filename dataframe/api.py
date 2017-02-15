@@ -1,3 +1,5 @@
+import pandas as pd
+
 from .column_expression import ColumnExpression
 
 def name(label, frame : pd.DataFrame):
@@ -29,5 +31,5 @@ def select(labels, frame : pd.DataFrame):
         return frame[list(labels)]
 
 
-def filter(condition : ColumnExpression, frame):
+def filter(condition : ColumnExpression, frame : pd.DataFrame):
     return frame[condition(frame)]
