@@ -1,3 +1,5 @@
+from .column_expression import ColumnExpression
+
 def name(label, frame : pd.DataFrame):
     """Assign a name to a data frame
 
@@ -25,3 +27,7 @@ def select(labels, frame : pd.DataFrame):
         return frame[list(map(labels, frame.columns))]
     else:
         return frame[list(labels)]
+
+
+def filter(condition : ColumnExpression, frame):
+    return frame[condition(frame)]
