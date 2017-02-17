@@ -1,49 +1,38 @@
+"""Refer to data frame columns, without referring to a specific data
+frame
+
+"""
+
 import math
 import operator as op
 
-class ColumnExpression:
+from .function_tree import Delayed
 
-    def __init__(self, *args):
+class Column:
+    """Represents a reference to a data frame column
 
-        if len(args) < 1:
-            raise ValueError
-        elif len(args) == 1:
-            self.operator = None
-            self.args = args[0]
-        else:
-            self.operator = args[0]
-            self.args = args[1:]
-            assert callable(self.operator)
+    """
+
+    def __init__(self, name):
+        self._column_label = name
 
     def __repr__(self):
-        if self.operator is not None:
-            return repr(self.operator) + repr(self.args)
-        else:
-            return 'Column(' + repr(self.args) + ')'
+        return 'C<{}>'.format(self._column_label)
 
     def __str__(self):
-        if self.operator is not None:
-            return str(self.operator) + str(self.args)
-        else:
-            return 'Column(' + str(self.args) + ')'
-
-    def __call__(self, frame):
-        if self.operator is None:
-            return frame[self.args]
-        else:
-            return self.operator(*(a(frame) if isinstance(a, ColumnExpression) else a for a in self.args))
+        return 'C<{}>'.format(self._column_label)
 
     def call(self, func):
-        """Apply a function of one argument to the column expression
+        """Apply a function of one argument to the column
 
         """
-        return ColumnExpression(func, self)
+        return Delayed(func, self)
 
     def _binop_right(self, operator, y):
-        return ColumnExpression(operator, self, y)
+        return Delayed(operator, self, y)
 
     def _binop_left(self, operator, x):
-        return ColumnExpression(operator, x, self)
+        return Delayed(operator, x, self)
 
     def __add__(self, y):
         return self._binop_right(op.add, y)
@@ -124,37 +113,37 @@ class ColumnExpression:
         return self._binop_left(op.or_, x)
 
     def __neg__(self):
-        return ColumnExpression(op.neg, self)
+        return Delayed(op.neg, self)
 
     def __pos__(self):
-        return ColumnExpression(op.pos, self)
+        return Delayed(op.pos, self)
 
     def __abs__(self):
-        return ColumnExpression(op.abs, self)
+        return Delayed(op.abs, self)
 
     def __invert__(self):
-        return ColumnExpression(op.invert, self)
+        return Delayed(op.invert, self)
 
     def __complex__(self):
-        return ColumnExpression(complex, self)
+        return Delayed(complex, self)
 
     def __int__(self):
-        return ColumnExpression(int, self)
+        return Delayed(int, self)
 
     def __float__(self):
-        return ColumnExpression(float, self)
+        return Delayed(float, self)
 
     def __round__(self, n=None):
-        return ColumnExpression(round, self)
+        return Delayed(round, self)
 
     def __ceil__(self):
-        return ColumnExpression(math.ceil, self)
+        return Delayed(math.ceil, self)
 
     def __floor__(self):
-        return ColumnExpression(math.floor, self)
+        return Delayed(math.floor, self)
 
     def __trunc__(self):
-        return ColumnExpression(math.trunc, self)
+        return Delayed(math.trunc, self)
 
     def __eq__(self, y):
         return self._binop_right(op.eq, y)
